@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acharyans Cafe | Authentic South Indian Cuisine</title>
+    <meta name="description"
+        content="Savor the taste of authentic South Indian cuisine at Acharyans Cafe. Browse our menu and order online today!">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Playfair+Display:wght@700;900&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">
+                <span class="logo-text">Acharyans</span>
+                <span class="logo-sub">Cafe</span>
+            </a>
+
+            <ul class="nav-links">
+                <li><a href="#home" class="active" onclick="scrollToSection(event, 'home')">Home</a></li>
+                <li><a href="#menu" onclick="scrollToSection(event, 'menu')">Menu</a></li>
+                <li><a href="#about" onclick="scrollToSection(event, 'about')">About</a></li>
+                <li><a href="#reservation" onclick="scrollToSection(event, 'reservation')">Reserve</a></li>
+                <li><a href="#contact" onclick="scrollToSection(event, 'contact')">Contact</a></li>
+                <li><a href="#admin" class="admin-link">Admin</a></li>
+            </ul>
+
+            <div class="nav-actions">
+                <button id="cart-btn" class="cart-btn">
+                    <i class="fas fa-shopping-basket"></i>
+                    <span id="cart-count">0</span>
+                </button>
+                <div class="mobile-menu-btn">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main id="main-content">
+        <!-- Storefront View -->
+        <div id="store-view">
+            <!-- Hero Section -->
+            <section id="home" class="hero">
+                <div class="hero-overlay"></div>
+                <div class="hero-content">
+                    <h1 class="reveal-text">A Taste of <br><span class="accent">Tradition & Passion</span></h1>
+                    <p>Authentic South Indian Cuisine. <br><strong>Now Launching: Exclusive Vegetarian Mess
+                            Facility!</strong></p>
+                    <div class="hero-btns">
+                        <a href="#menu" class="btn btn-primary" onclick="scrollToSection(event, 'menu')">Order Now</a>
+                        <a href="#reservation" class="btn btn-secondary border-accent"
+                            onclick="scrollToSection(event, 'reservation')">Reserve to Celebrate</a>
+                    </div>
+                    <p class="hero-subtext">Catering Available for All Occasions | Contact: 9632297927</p>
+                </div>
+            </section>
+
+            <!-- Menu Section -->
+            <section id="menu" class="menu-section">
+                <div class="section-header">
+                    <h2>Premium Menu</h2>
+                    <p class="section-subtitle">Exquisite flavors and beyond</p>
+                    <div class="divider"></div>
+                    <div class="category-filters" id="category-filters">
+                        <!-- Dynamic Filters -->
+                    </div>
+                </div>
+
+                <div class="menu-grid" id="menu-grid">
+                    <!-- Dynamic Menu Items -->
+                </div>
+            </section>
+
+            <!-- About Section -->
+            <section id="about" class="about-section">
+                <div class="about-container">
+                    <div class="about-image">
+                        <img src="https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&q=80&w=600"
+                            alt="Cafe Interior">
+                    </div>
+                    <div class="about-text">
+                        <h3>Our Culinary Story</h3>
+                        <p>Located in Peenya, Bengaluru, Acharyans Cafe is more than just a restaurant; it's a
+                            celebration of heritage. We bring the authentic spices and recipes
+                            to your plate.</p>
+                        <ul class="features">
+                            <li><i class="fas fa-leaf"></i> 100% Pure Vegetarian</li>
+                            <li><i class="fas fa-utensils"></i> Traditional Cooking Methods</li>
+                            <li><i class="fas fa-clock"></i> Freshly Prepared Daily</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Reservation Section -->
+            <section id="reservation" class="reservation-section">
+                <div class="section-banner">
+                    <div class="banner-content">
+                        <h2>Celebrate Your Special Moments</h2>
+                        <p>Book a table for birthdays, anniversaries, or a simple get-together.</p>
+                    </div>
+                </div>
+                <div class="reservation-container">
+                    <div class="reservation-card">
+                        <form id="reservation-form" class="reservation-form">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label><i class="fas fa-calendar-alt"></i> Date</label>
+                                    <input type="date" required id="reserve-date">
+                                </div>
+                                <div class="form-group">
+                                    <label><i class="fas fa-clock"></i> Time</label>
+                                    <input type="time" required id="reserve-time">
+                                </div>
+                                <div class="form-group">
+                                    <label><i class="fas fa-users"></i> Guests</label>
+                                    <input type="number" min="1" max="20" placeholder="Number of guests" required
+                                        id="reserve-guests">
+                                </div>
+                                <div class="form-group">
+                                    <label><i class="fas fa-bullhorn"></i> Occasion</label>
+                                    <select id="reserve-occasion">
+                                        <option value="Casual">Casual Dining</option>
+                                        <option value="Birthday">Birthday</option>
+                                        <option value="Anniversary">Anniversary</option>
+                                        <option value="Party">Private Party</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group full-width">
+                                <textarea placeholder="Special requests or notes (e.g., cake, decorations...)"
+                                    id="reserve-notes"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">Confirm Reservation</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Contact Section -->
+            <section id="contact" class="contact-section">
+                <div class="section-header">
+                    <h2>Get in Touch</h2>
+                    <p class="section-subtitle">Visit us or drop a message</p>
+                    <div class="divider"></div>
+                </div>
+                <div class="contact-container">
+                    <div class="contact-info-cards">
+                        <div class="info-card">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <h4>Reach Us</h4>
+                            <p id="contact-address">Loading address...</p>
+                        </div>
+                        <div class="info-card">
+                            <i class="fas fa-phone-alt"></i>
+                            <h4>Call Us</h4>
+                            <p id="contact-phone">Loading phone...</p>
+                        </div>
+                        <div class="info-card">
+                            <i class="fas fa-envelope"></i>
+                            <h4>Email Us</h4>
+                            <p id="contact-email">Loading email...</p>
+                        </div>
+                    </div>
+                    <form id="contact-form" class="contact-form">
+                        <div class="form-group">
+                            <input type="text" placeholder="Your Name" required>
+                            <input type="email" placeholder="Your Email" required>
+                        </div>
+                        <input type="text" placeholder="Subject" required>
+                        <textarea placeholder="Your Message" rows="5" required></textarea>
+                        <button type="submit" class="btn btn-primary">Send Message</button>
+                    </form>
+                </div>
+            </section>
+        </div>
+
+        <!-- Admin Dashboard View (Separate) -->
+        <div id="admin-view" class="admin-panel hidden">
+            <div class="admin-container">
+                <div class="admin-header">
+                    <h2><i class="fas fa-user-shield"></i> Admin Dashboard</h2>
+                    <button class="btn btn-secondary" onclick="showView('store')"><i class="fas fa-store"></i> Back to
+                        Store</button>
+                </div>
+                <div class="admin-tabs">
+                    <button class="tab-btn active" data-tab="orders" onclick="switchAdminTab('orders')"><i
+                            class="fas fa-shopping-bag"></i> Recent Orders</button>
+                    <button class="tab-btn" data-tab="reservations" onclick="switchAdminTab('reservations')"><i
+                            class="fas fa-calendar-check"></i> Reservations</button>
+                </div>
+                <div id="admin-orders" class="admin-tab-content active">
+                    <!-- Orders List -->
+                </div>
+                <div id="admin-reservations" class="admin-tab-content">
+                    <!-- Reservations List -->
+                </div>
+            </div>
+        </div>
+        </div>
+    </main>
+
+    <!-- Cart Sidebar -->
+    <div id="cart-sidebar" class="cart-sidebar">
+        <div class="cart-header">
+            <h3>Your Basket</h3>
+            <button id="close-cart"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="cart-items" class="cart-items">
+            <!-- Dynamic Cart Items -->
+            <div class="empty-cart-msg">Your basket is empty.</div>
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>Total</span>
+                <span id="total-price">₹0</span>
+            </div>
+            <button id="checkout-btn" class="btn btn-primary btn-block">Proceed to Checkout</button>
+        </div>
+    </div>
+
+    <div id="overlay" class="overlay"></div>
+
+    <!-- Admin Login Modal -->
+    <div id="admin-login-modal" class="auth-modal hidden">
+        <div class="modal-content">
+            <button class="close-modal" onclick="hideLoginModal()"><i class="fas fa-times"></i></button>
+            <div class="modal-header">
+                <h3>Admin Access</h3>
+                <p>Please enter the management password</p>
+            </div>
+            <form id="admin-login-form">
+                <div class="form-group">
+                    <input type="password" id="admin-password" placeholder="Password" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Unlock Dashboard</button>
+            </form>
+            <p id="auth-error" class="error-msg hidden">Incorrect password. Please try again.</p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-info">
+                <h4>Acharyans Cafe</h4>
+                <p id="footer-address"></p>
+                <div class="social-links">
+                    <a href="https://www.instagram.com/acharyans_cafe/" target="_blank"><i
+                            class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                &copy; 2026 Acharyans Cafe. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,16 @@
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Gemini/Antigravity artifacts (if any are in the project folder)
+.gemini/
+.agent/
+.agents/
+brain/
+tmp/
