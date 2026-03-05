@@ -201,15 +201,114 @@
                 </div>
                 <div class="admin-tabs">
                     <button class="tab-btn active" data-tab="orders" onclick="switchAdminTab('orders')"><i
-                            class="fas fa-shopping-bag"></i> Recent Orders</button>
+                            class="fas fa-shopping-bag"></i> Orders</button>
                     <button class="tab-btn" data-tab="reservations" onclick="switchAdminTab('reservations')"><i
                             class="fas fa-calendar-check"></i> Reservations</button>
+                    <button class="tab-btn" data-tab="menu_mgmt" onclick="switchAdminTab('menu_mgmt')"><i
+                            class="fas fa-utensils"></i> Menu Stock</button>
                 </div>
                 <div id="admin-orders" class="admin-tab-content active">
                     <!-- Orders List -->
                 </div>
                 <div id="admin-reservations" class="admin-tab-content">
                     <!-- Reservations List -->
+                </div>
+                <div id="admin-menu_mgmt" class="admin-tab-content">
+                    <div id="admin-menu-list" class="admin-menu-list">
+                        <!-- Dynamic Menu Availability List -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Checkout View (Full Page) -->
+        <div id="checkout-view" class="checkout-panel hidden">
+            <div class="checkout-container">
+                <div class="checkout-header-actions">
+                    <button class="btn-back" onclick="showView('store')"><i class="fas fa-arrow-left"></i> Back to
+                        Menu</button>
+                    <h2><i class="fas fa-shopping-cart"></i> Secure Checkout</h2>
+                </div>
+
+                <div class="checkout-grid">
+                    <div class="checkout-form-section">
+                        <form id="checkout-form-view" class="checkout-form main-form">
+                            <div class="form-section-title">
+                                <h3><i class="fas fa-user"></i> Customer Information</h3>
+                            </div>
+
+                            <div class="order-type-toggle page-toggle">
+                                <input type="radio" id="type-dinein-view" name="orderTypeView" value="dinein" checked>
+                                <label for="type-dinein-view"><i class="fas fa-utensils"></i> Dine In</label>
+
+                                <input type="radio" id="type-delivery-view" name="orderTypeView" value="delivery">
+                                <label for="type-delivery-view"><i class="fas fa-truck"></i> Delivery</label>
+                            </div>
+
+                            <div id="dinein-details-view" class="order-details-group">
+                                <div class="form-group">
+                                    <label><i class="fas fa-chair"></i> Table Number</label>
+                                    <input type="number" id="checkout-table-view" placeholder="Enter Table No."
+                                        required>
+                                </div>
+                            </div>
+
+                            <div id="delivery-details-view" class="order-details-group hidden">
+                                <div class="form-group">
+                                    <label><i class="fas fa-map-marker-alt"></i> Delivery Address</label>
+                                    <textarea id="checkout-address-view" placeholder="Enter full delivery address"
+                                        rows="2"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Name</label>
+                                    <input type="text" id="checkout-name-view" placeholder="Your Name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Phone</label>
+                                    <input type="tel" id="checkout-phone-view" placeholder="Phone Number" required>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Email (Optional)</label>
+                                <input type="email" id="checkout-email-view" placeholder="Email Address">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Special Instructions</label>
+                                <textarea id="checkout-instructions-view"
+                                    placeholder="Any special requests?"></textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-block btn-lg">Place Order & Proceed to
+                                Payment</button>
+                        </form>
+                    </div>
+
+                    <div class="checkout-summary-section">
+                        <div class="summary-card sticky-card">
+                            <h3><i class="fas fa-receipt"></i> Your Order Summary</h3>
+                            <div id="checkout-items-list-view" class="checkout-items-list-page">
+                                <!-- Dynamic Items -->
+                            </div>
+                            <div class="summary-totals">
+                                <div class="total-row">
+                                    <span>Subtotal</span>
+                                    <span id="summary-subtotal">₹0</span>
+                                </div>
+                                <div class="total-row final-total">
+                                    <span>Total Amount</span>
+                                    <span id="summary-total">₹0</span>
+                                </div>
+                            </div>
+                            <div class="summary-guarantee">
+                                <p><i class="fas fa-shield-alt"></i> Safe and Secure Checkout</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -252,6 +351,59 @@
                 <button type="submit" class="btn btn-primary btn-block">Unlock Dashboard</button>
             </form>
             <p id="auth-error" class="error-msg hidden">Incorrect password. Please try again.</p>
+        </div>
+    </div>
+
+
+
+    <!-- Payment & Confirmation Modal -->
+    <div id="payment-modal" class="auth-modal hidden">
+        <div class="modal-content payment-modal-content">
+            <div class="modal-header">
+                <h3>Final Step: Payment</h3>
+                <p>Scan QR to complete your order</p>
+            </div>
+            <div class="payment-body">
+                <div class="qr-container" id="payment-qr">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=9632297927@upi&pn=AcharyansCafe&am=0&cu=INR"
+                        alt="UPI QR">
+                    <div class="qr-overlay">
+                        <span>₹<span id="payment-amount">0</span></span>
+                    </div>
+                </div>
+                <div class="payment-info">
+                    <p><i class="fas fa-info-circle"></i> After payment, our system will automatically verify and start
+                        preparing your meal.</p>
+                </div>
+                <div class="payment-actions">
+                    <button id="confirm-payment-btn" class="btn btn-primary btn-block">Confirm Payment & Notify
+                        Cafe</button>
+                    <button id="whatsapp-notify-btn" class="btn btn-secondary btn-block border-accent hidden"><i
+                            class="fab fa-whatsapp"></i> Share on WhatsApp</button>
+                    <button class="btn btn-secondary btn-block" onclick="closePaymentModal()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Receipt Modal -->
+    <div id="receipt-modal" class="auth-modal hidden">
+        <div class="modal-content receipt-content">
+            <button class="close-modal" onclick="closeReceiptModal()"><i class="fas fa-times"></i></button>
+            <div class="receipt-header">
+                <div class="logo-text">Acharyans</div>
+                <div class="logo-sub">Cafe</div>
+                <p>Digital Receipt</p>
+                <div class="divider"></div>
+            </div>
+            <div id="receipt-details" class="receipt-details">
+                <!-- Dynamic Receipt Items -->
+            </div>
+            <div class="receipt-footer">
+                <p>Thank you for choosing Acharyans Cafe!</p>
+                <div class="divider"></div>
+                <button class="btn btn-secondary btn-block" onclick="window.print()">Print Receipt</button>
+            </div>
         </div>
     </div>
 

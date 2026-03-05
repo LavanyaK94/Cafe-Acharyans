@@ -49,19 +49,23 @@ function renderMenu() {
         ? menuData
         : menuData.filter(item => item.category === currentCategory);
 
-    menuGrid.innerHTML = filteredMenu.map(item => `
-        <div class="menu-card" data-aos="fade-up">
-            <img src="${item.image}" alt="${item.name}" class="card-img" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=400'">
-            <div class="card-content">
-                <h3>${item.name}</h3>
-                <div class="card-price">₹${item.price}</div>
-                <p class="card-desc">${item.description}</p>
-                <button class="add-to-cart" onclick="addToCart(${item.id})">
-                    Add to Basket
-                </button>
+    menuGrid.innerHTML = filteredMenu.map(item => {
+        const isOutOfStock = localStorage.getItem(`stock_${item.id}`) === 'false';
+        return `
+            <div class="menu-card ${isOutOfStock ? 'out-of-stock' : ''}" data-aos="fade-up">
+                ${isOutOfStock ? '<div class="stock-badge">Out of Stock</div>' : ''}
+                <img src="${item.image}" alt="${item.name}" class="card-img" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=400'">
+                <div class="card-content">
+                    <h3>${item.name}</h3>
+                    <div class="card-price">₹${item.price}</div>
+                    <p class="card-desc">${item.description}</p>
+                    <button class="add-to-cart" onclick="addToCart(${item.id})" ${isOutOfStock ? 'disabled' : ''}>
+                        ${isOutOfStock ? 'Unavailable' : 'Add to Basket'}
+                    </button>
+                </div>
             </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 // Cart Logic
@@ -152,22 +156,29 @@ window.scrollToSection = (e, id) => {
     });
 
     // Close mobile menu if open
-    // (Add logic here if mobile menu is implemented)
+    document.querySelector('.nav-links').classList.remove('active');
 };
 
 window.showView = (view) => {
     const storeView = document.getElementById('store-view');
     const adminView = document.getElementById('admin-view');
+    const checkoutView = document.getElementById('checkout-view');
+
+    // Hide all
+    storeView.classList.add('hidden');
+    adminView.classList.add('hidden');
+    checkoutView.classList.add('hidden');
 
     if (view === 'admin') {
-        storeView.classList.add('hidden');
         adminView.classList.remove('hidden');
         renderAdminOrders();
-        window.scrollTo(0, 0);
+    } else if (view === 'checkout') {
+        checkoutView.classList.remove('hidden');
+        renderCheckoutSummaryView();
     } else {
         storeView.classList.remove('hidden');
-        adminView.classList.add('hidden');
     }
+    window.scrollTo(0, 0);
 };
 
 function setupEventListeners() {
@@ -176,9 +187,18 @@ function setupEventListeners() {
     const overlay = document.getElementById('overlay');
     const navbar = document.querySelector('.navbar');
 
+    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+    const navLinks = document.querySelector('.nav-links');
+
     cartBtn.addEventListener('click', openCart);
     closeCart.addEventListener('click', closeCartSidebar);
     overlay.addEventListener('click', closeCartSidebar);
+
+    if (mobileMenuBtn) {
+        mobileMenuBtn.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+        });
+    }
 
     window.addEventListener('scroll', () => {
         if (window.scrollY > 50) {
@@ -212,8 +232,38 @@ function setupEventListeners() {
             alert('Your basket is empty!');
             return;
         }
-        placeOrder();
+        openCheckoutModal();
     });
+
+    // Checkout Page Toggles
+    const typeDineInView = document.getElementById('type-dinein-view');
+    const typeDeliveryView = document.getElementById('type-delivery-view');
+
+    if (typeDineInView) {
+        typeDineInView.addEventListener('change', () => {
+            document.getElementById('dinein-details-view').classList.remove('hidden');
+            document.getElementById('delivery-details-view').classList.add('hidden');
+            document.getElementById('checkout-table-view').required = true;
+            document.getElementById('checkout-address-view').required = false;
+        });
+    }
+
+    if (typeDeliveryView) {
+        typeDeliveryView.addEventListener('change', () => {
+            document.getElementById('dinein-details-view').classList.add('hidden');
+            document.getElementById('delivery-details-view').classList.remove('hidden');
+            document.getElementById('checkout-table-view').required = false;
+            document.getElementById('checkout-address-view').required = true;
+        });
+    }
+
+    const checkoutFormView = document.getElementById('checkout-form-view');
+    if (checkoutFormView) {
+        checkoutFormView.addEventListener('submit', (e) => {
+            e.preventDefault();
+            finalPlaceOrderView();
+        });
+    }
 
     // Contact Form
     document.getElementById('contact-form').addEventListener('submit', (e) => {
@@ -231,6 +281,7 @@ function setupEventListeners() {
     // Admin Panel Navigation
     document.querySelector('.admin-link').addEventListener('click', (e) => {
         e.preventDefault();
+        document.querySelector('.nav-links').classList.remove('active');
         checkAdminSession();
     });
 
@@ -286,7 +337,168 @@ function closeCartSidebar() {
     document.getElementById('overlay').classList.remove('visible');
 }
 
+function openCheckoutModal() {
+    showView('checkout');
+    closeCartSidebar();
+}
+
+function closeCheckoutModal() {
+    document.getElementById('checkout-modal').classList.add('hidden');
+    document.getElementById('overlay').classList.remove('visible');
+}
+
+function renderCheckoutSummaryView() {
+    const list = document.getElementById('checkout-items-list-view');
+    const subtotal = document.getElementById('summary-subtotal');
+    const total = document.getElementById('summary-total');
+
+    if (!list) return;
+
+    list.innerHTML = cart.map(item => `
+        <div class="checkout-item-mini">
+            <span class="checkout-item-name">${item.name} x ${item.quantity}</span>
+            <span class="checkout-item-price">₹${item.price * item.quantity}</span>
+        </div>
+    `).join('');
+
+    const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    subtotal.textContent = `₹${totalAmount}`;
+    total.textContent = `₹${totalAmount}`;
+}
+
+function finalPlaceOrderView() {
+    const orderType = document.querySelector('input[name="orderTypeView"]:checked').value;
+    const name = document.getElementById('checkout-name-view').value;
+    const phone = document.getElementById('checkout-phone-view').value;
+    const email = document.getElementById('checkout-email-view').value;
+    const instructions = document.getElementById('checkout-instructions-view').value;
+
+    const details = {
+        name,
+        phone,
+        email,
+        instructions,
+        orderType
+    };
+
+    if (orderType === 'dinein') {
+        details.tableNumber = document.getElementById('checkout-table-view').value;
+    } else {
+        details.address = document.getElementById('checkout-address-view').value;
+    }
+
+    const order = {
+        id: Date.now(),
+        items: [...cart],
+        total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+        status: 'Pending',
+        timestamp: new Date().toLocaleString(),
+        customer: details
+    };
+
+    cart = [];
+    saveCart();
+    updateCartUI();
+
+    // Go back to home state (conceptually)
+    showView('store');
+
+    // Show payment modal
+    showPaymentModal(order);
+}
+
+// Payment & Confirmation Logic
+function showPaymentModal(order) {
+    const modal = document.getElementById('payment-modal');
+    const amountSpan = document.getElementById('payment-amount');
+    amountSpan.textContent = order.total;
+
+    modal.classList.remove('hidden');
+    document.getElementById('overlay').classList.add('visible');
+
+    // Setup temporary order storage
+    window.currentPendingOrder = order;
+
+    document.getElementById('confirm-payment-btn').onclick = confirmPayment;
+}
+
+window.closePaymentModal = () => {
+    document.getElementById('payment-modal').classList.add('hidden');
+    if (!document.getElementById('checkout-modal').classList.contains('hidden') === false) {
+        document.getElementById('overlay').classList.remove('visible');
+    }
+}
+
+function confirmPayment() {
+    const order = window.currentPendingOrder;
+    if (!order) return;
+
+    let orders = JSON.parse(localStorage.getItem('acharyans_orders')) || [];
+    orders.push(order);
+    localStorage.setItem('acharyans_orders', JSON.stringify(orders));
+
+    // Update UI
+    document.getElementById('confirm-payment-btn').classList.add('hidden');
+    document.getElementById('whatsapp-notify-btn').classList.remove('hidden');
+
+    const receiptBtn = document.createElement('button');
+    receiptBtn.className = "btn btn-secondary btn-block border-accent";
+    receiptBtn.innerHTML = '<i class="fas fa-file-invoice"></i> View Receipt';
+    receiptBtn.onclick = () => showReceiptModal(order);
+    document.querySelector('.payment-actions').appendChild(receiptBtn);
+
+    document.getElementById('whatsapp-notify-btn').onclick = () => {
+        sendWhatsAppNotification(order);
+    };
+
+    alert(`Order Confirmed! Your payment of ₹${order.total} has been received.`);
+}
+
+function showReceiptModal(order) {
+    const modal = document.getElementById('receipt-modal');
+    const details = document.getElementById('receipt-details');
+
+    details.innerHTML = `
+        <div class="receipt-info">
+            <p><strong>Order ID:</strong> #${order.id.toString().slice(-6)}</p>
+            <p><strong>Date:</strong> ${order.timestamp}</p>
+            <p><strong>Customer:</strong> ${order.customer.name}</p>
+            <p><strong>Type:</strong> ${order.customer.orderType.toUpperCase()}</p>
+        </div>
+        <div class="divider"></div>
+        ${order.items.map(i => `
+            <div class="receipt-row">
+                <span>${i.name} x ${i.quantity}</span>
+                <span>₹${i.price * i.quantity}</span>
+            </div>
+        `).join('')}
+        <div class="receipt-row total">
+            <span>Total Payable</span>
+            <span>₹${order.total}</span>
+        </div>
+    `;
+
+    modal.classList.remove('hidden');
+    document.getElementById('payment-modal').classList.add('hidden');
+}
+
+window.closeReceiptModal = () => {
+    document.getElementById('receipt-modal').classList.add('hidden');
+    document.getElementById('overlay').classList.remove('visible');
+}
+
+function sendWhatsAppNotification(order) {
+    const phone = "9632297927";
+    const items = order.items.map(i => `${i.name} x${i.quantity}`).join(', ');
+    const type = order.customer.orderType === 'dinein' ? `Dine-in (Table ${order.customer.tableNumber})` : `Delivery to ${order.customer.address}`;
+    const message = `*New Order from Acharyans Cafe*%0A%0A*Order:* ${items}%0A*Total:* ₹${order.total}%0A*Type:* ${type}%0A*Customer:* ${order.customer.name} (${order.customer.phone})%0A*Status:* Paid Online`;
+
+    window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+}
+
 function placeOrder() {
+    // This function is now superseded by finalPlaceOrder, 
+    // but kept for reference or direct calls if needed.
     const order = {
         id: Date.now(),
         items: [...cart],
@@ -337,6 +549,7 @@ window.switchAdminTab = (tab) => {
 
     if (tab === 'orders') renderAdminOrders();
     if (tab === 'reservations') renderAdminReservations();
+    if (tab === 'menu_mgmt') renderAdminMenuMgmt();
 };
 
 function renderAdminOrders() {
@@ -354,9 +567,12 @@ function renderAdminOrders() {
                 <tr>
                     <th>Order ID</th>
                     <th>Date</th>
+                    <th>Type</th>
+                    <th>Details</th>
                     <th>Items</th>
                     <th>Total</th>
                     <th>Status</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -364,15 +580,77 @@ function renderAdminOrders() {
                     <tr>
                         <td>#${order.id.toString().slice(-6)}</td>
                         <td>${order.timestamp}</td>
+                        <td><span class="status-badge ${order.customer?.orderType === 'delivery' ? 'delivery' : 'dinein'}">${order.customer?.orderType?.toUpperCase() || 'N/A'}</span></td>
+                        <td>
+                            ${order.customer ? `
+                                <strong>${order.customer.name}</strong><br>
+                                ${order.customer.phone}<br>
+                                ${order.customer.orderType === 'dinein' ? 'Table: ' + order.customer.tableNumber : order.customer.address}
+                            ` : 'Direct Order'}
+                        </td>
                         <td>${order.items.map(i => `${i.name} (${i.quantity})`).join(', ')}</td>
                         <td>₹${order.total}</td>
                         <td><span class="status-badge ${order.status.toLowerCase()}">${order.status}</span></td>
+                        <td>
+                            <div class="action-btn-group">
+                                ${order.status === 'Pending' ? `<button class="action-btn btn-status-next" onclick="updateOrderStatus(${order.id}, 'Preparing')">Prepare</button>` : ''}
+                                ${order.status === 'Preparing' ? `<button class="action-btn btn-status-next" onclick="updateOrderStatus(${order.id}, 'Ready')">Ready</button>` : ''}
+                                ${order.status === 'Ready' ? `<button class="action-btn btn-status-next" onclick="updateOrderStatus(${order.id}, 'Completed')">Done</button>` : ''}
+                                <button class="action-btn btn-delete" onclick="deleteOrder(${order.id})"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </td>
                     </tr>
                 `).join('')}
             </tbody>
         </table>
     `;
 }
+
+window.updateOrderStatus = (id, newStatus) => {
+    let orders = JSON.parse(localStorage.getItem('acharyans_orders')) || [];
+    const index = orders.findIndex(o => o.id === id);
+    if (index !== -1) {
+        orders[index].status = newStatus;
+        localStorage.setItem('acharyans_orders', JSON.stringify(orders));
+        renderAdminOrders();
+    }
+};
+
+window.deleteOrder = (id) => {
+    if (confirm('Delete this order?')) {
+        let orders = JSON.parse(localStorage.getItem('acharyans_orders')) || [];
+        orders = orders.filter(o => o.id !== id);
+        localStorage.setItem('acharyans_orders', JSON.stringify(orders));
+        renderAdminOrders();
+    }
+};
+
+function renderAdminMenuMgmt() {
+    const menuList = document.getElementById('admin-menu-list');
+    menuList.innerHTML = menuData.map(item => {
+        const isOutOfStock = localStorage.getItem(`stock_${item.id}`) === 'false';
+        return `
+            <div class="menu-mgmt-card">
+                <div class="menu-mgmt-info">
+                    <h4>${item.name}</h4>
+                    <p>₹${item.price}</p>
+                </div>
+                <button class="stock-toggle-btn ${isOutOfStock ? 'out-of-stock' : 'in-stock'}" 
+                    onclick="toggleStock(${item.id})">
+                    ${isOutOfStock ? 'OUT OF STOCK' : 'IN STOCK'}
+                </button>
+            </div>
+        `;
+    }).join('');
+}
+
+window.toggleStock = (id) => {
+    const key = `stock_${id}`;
+    const current = localStorage.getItem(key) !== 'false';
+    localStorage.setItem(key, !current);
+    renderAdminMenuMgmt();
+    renderMenu(); // Update storefront
+};
 
 function renderAdminReservations() {
     const resList = document.getElementById('admin-reservations');
